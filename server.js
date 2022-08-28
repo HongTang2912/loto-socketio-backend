@@ -138,9 +138,13 @@ io.on('connection', function (socket) {
 
             console.log("room ID: " + room)
 
-            console.log(users)
+            const players = users.filter(u => u.room_id == room)
 
-            socket.on(room).emit("new-user", users)
+            for (var i = 1; i <= players?.length; i++) {
+                if (i <= 1) socket.emit("new-user", players)
+
+                else socket.to(players[i - 1]?.id).emit("new-user", players)
+            }
 
         }
 
