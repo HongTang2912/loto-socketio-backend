@@ -129,7 +129,7 @@ io.on('connection', function (socket) {
         const room = users[indexOfObject]?.room_id
         if (room) {
 
-            let index = eachRoomsNumbers?.findIndex((obj => obj.room == room))
+            let index = eachRoomsNumbers?.findIndex((obj => obj?.room == room))
 
             // socket.leave(room)
 
@@ -140,7 +140,7 @@ io.on('connection', function (socket) {
 
             console.log(users)
 
-            socket.on(room).emit("new-user", users.filter(u => u.room_id == room))
+            socket.on(room).emit("new-user", users)
 
         }
 
