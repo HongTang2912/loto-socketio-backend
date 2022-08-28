@@ -6,13 +6,15 @@ const server = http.createServer(app)
 
 const tables = require('./index')
 
+const port = process.env.PORT || 3000
+
 // app.get('/', (req, res) => {
 //     const cookies = require('cookie-universal')(req, res)
 //     cookies.set('users', users)
 // })
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: "https://loto-next-app.herokuapp.com/",
         methods: ["GET", "POST"]
     },
 });
@@ -126,6 +128,6 @@ io.on('connection', function (socket) {
     }
 })
 
-server.listen(3001, () => {
+server.listen(port, () => {
     console.log("SERVER IS RUNNING");
 })
