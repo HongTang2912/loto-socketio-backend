@@ -6,10 +6,8 @@ const server = http.createServer(app)
 
 const tables = require('./index')
 
-// app.get('/', (req, res) => {
-//     const cookies = require('cookie-universal')(req, res)
-//     cookies.set('users', users)
-// })
+const port = process.env.PORT || 3001
+
 const io = new Server(server, {
     cors: {
         origin: "http://localhost:3000",
@@ -26,13 +24,13 @@ let players_table;
 io.on('connection', function (socket) {
     console.log(`User: ${socket.id}`)
 
-    
-   
+
+
 
     socket.on('join_room', function (room) {
         socket.join(room);
     })
-    // console.log("User connected: " + socket.id)
+
     socket.on('get-user', function (user) {
         users.push({ id: socket.id, player: user.player, room_id: user.room_id })
         socket.to(user.room_id).emit("new-user", users.filter(u => u.room_id == user.room_id))
@@ -45,10 +43,19 @@ io.on('connection', function (socket) {
 
         randomTables = tables.random
         players_table = tables.numbers.sort((a, b) => 0.5 - Math.random()).splice(0, players.length)
+
+
         console.log(players_table)
-        for (let i = 0; i < players.length; i++) {
-            console.log(randomTables[players_table[i] + ""])
+        const aTable = (index) => {
+
+            return randomTables[players_table[index - 1] + ""]?.map(t => t.sort((a, b) => 0.5 - Math.random()))
+
         }
+
+        for (let i = 0; i < players.length; i++) {
+            console.log(aTable(i+1))
+        }
+
 
         let roomNumbers = {
             randomNumbers: tables.numbers.sort((a, b) => 0.5 - Math.random()),
@@ -58,16 +65,18 @@ io.on('connection', function (socket) {
 
         eachRoomsNumbers.push(roomNumbers)
 
-        for (var i = 0; i < players?.length; i++) {
+        for (var i = 1; i <= players?.length; i++) {
+            if (i <= 1) socket.emit("new-game", aTable(i), !isStarted, players[0]?.player)
 
-            socket.to(players[i]?.id).emit("new-game", randomTables[players_table[i] + ""], !isStarted, players[i]?.player)
+            else socket.to(players[i-1]?.id).emit("new-game", aTable(i), !isStarted, players[i]?.player)
         }
-        socket.emit("new-game", randomTables[players_table[0] + ""], !isStarted, players[0]?.player)
     })
 
     socket.on("call-number", (room, count, player) => {
 
+
         let index = eachRoomsNumbers?.findIndex((obj => obj.room == room))
+        console.log(eachRoomsNumbers[index]?.calledNumbers)
 
         eachRoomsNumbers[index]?.calledNumbers.push(
             eachRoomsNumbers[index]?.randomNumbers[count]
@@ -85,7 +94,7 @@ io.on('connection', function (socket) {
                 return t2.filter(a => list.includes(a)).length
             }).findIndex((a) => [5].includes(a))
         )
-        
+
         for (let i = 0; i < users.filter(u => u.room_id == room).length; i++) {
             if (checkArr[players_table[i]] != -1 && checkArr[players_table[i]] >= 0 && checkArr[players_table[i]] <= 4) {
                 winner = users.filter(u => u.room_id == room)[i].player
@@ -94,7 +103,7 @@ io.on('connection', function (socket) {
 
         let index = eachRoomsNumbers?.findIndex((obj => obj.room == room))
         eachRoomsNumbers?.splice(index, 1)
-        console.log(winner)
+
 
         socket.emit("the-winner", list, room, winner)
         socket.to(room).emit("the-winner", list, room, winner)
@@ -106,6 +115,8 @@ io.on('connection', function (socket) {
 
     })
     socket.on('disconnecting', function () {
+
+        
 
         io.emit("new-user", users.filter(u => !u.id.includes(leaveID(socket)[0])))
     });
@@ -119,13 +130,16 @@ io.on('connection', function (socket) {
         const indexOfObject = users.findIndex(object => {
             return object.id == socket.id;
         });
+        socket.leave(users[indexOfObject]?.room_id)
+
+        eachRoomsNumbers?.splice(indexOfObject, 1)
         users.splice(indexOfObject, 1)
-        console.log(arrRooms[0])
+
         return arrRooms
 
     }
 })
 
-server.listen(3001, () => {
+server.listen(port, () => {
     console.log("SERVER IS RUNNING");
 })
