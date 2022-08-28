@@ -14,7 +14,7 @@ const port = process.env.PORT || 3000
 // })
 const io = new Server(server, {
     cors: {
-        origin: "https://loto-next-app.herokuapp.com/",
+        origin: "https://loto-next-app.herokuapp.com",
         methods: ["GET", "POST"]
     },
 });
