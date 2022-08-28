@@ -49,13 +49,12 @@ io.on('connection', function (socket) {
 
         const aTable = (index) => {
 
-            return randomTables[players_table[index - 1] + ""]?.map(t => t.sort((a, b) => 0.5 - Math.random()))
+            return randomTables[players_table[index - 1] + ""]?.map(t => 
+                t.sort((a, b) => 0.5 - Math.random())).map((_, colIndex) => 
+            randomTables[players_table[index - 1] + ""].map(row => row[colIndex]))
 
         }
 
-        // for (let i = 0; i < players.length; i++) {
-        //     console.log(aTable(i+1))
-        // }
 
 
         let roomNumbers = {
