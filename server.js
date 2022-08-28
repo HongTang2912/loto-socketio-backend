@@ -132,8 +132,7 @@ io.on('connection', function (socket) {
             let index = eachRoomsNumbers?.findIndex((obj => obj?.room == room))
 
             // socket.leave(room)
-
-            eachRoomsNumbers?.splice(index, 1)
+            if (index) eachRoomsNumbers?.splice(index, 1)
             users.splice(indexOfObject, 1)
 
             console.log("room ID: " + room)
@@ -141,9 +140,9 @@ io.on('connection', function (socket) {
             const players = users.filter(u => u.room_id == room)
 
             for (var i = 1; i <= players?.length; i++) {
-                if (i <= 1) socket.emit("new-user", players)
+                
 
-                else socket.to(players[i - 1]?.id).emit("new-user", players)
+                socket.to(players[i - 1]?.id).emit("new-user", players)
             }
 
         }
