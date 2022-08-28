@@ -12,7 +12,7 @@ const port = process.env.PORT || 3001
 
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: "https://loto-next-app.herokuapp.com",
         methods: ["GET", "POST"]
     },
 });
@@ -146,6 +146,6 @@ io.on('connection', function (socket) {
     }
 })
 
-server.listen(3001, () => {
+server.listen(port, () => {
     console.log("SERVER IS RUNNING");
 })
