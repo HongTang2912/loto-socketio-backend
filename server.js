@@ -119,7 +119,7 @@ io.on('connection', function (socket) {
 
         
 
-        io.emit("new-user", users.filter(u => u.id != leaveID(socket)))
+        socket.to(leaveID(socket)).emit("new-user", users.filter(u => u.room_id != leaveID(socket)))
     });
 
     function leaveID(socket) {
@@ -136,6 +136,8 @@ io.on('connection', function (socket) {
 
         eachRoomsNumbers?.splice(index, 1)
         users.splice(indexOfObject, 1)
+
+        console.log("room ID: " + room)
 
         console.log(users)
 
