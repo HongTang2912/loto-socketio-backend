@@ -119,7 +119,7 @@ io.on('connection', function (socket) {
 
         
 
-        socket.to(leaveID(socket)).emit("new-user", users.filter(u => u.room_id != leaveID(socket)))
+        io.emit("new-user", users.filter(u => u.room_id != leaveID(socket)))
     });
 
     function leaveID(socket) {
