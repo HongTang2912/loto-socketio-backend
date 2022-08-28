@@ -6,11 +6,20 @@ const server = http.createServer(app)
 
 const tables = require('./index')
 
+<<<<<<< HEAD
 const port = process.env.PORT || 3001
 
+=======
+const port = process.env.PORT || 3000
+
+// app.get('/', (req, res) => {
+//     const cookies = require('cookie-universal')(req, res)
+//     cookies.set('users', users)
+// })
+>>>>>>> 207d62f48397e39412ce41b57df0399dd9b7b424
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: "https://loto-next-app.herokuapp.com",
         methods: ["GET", "POST"]
     },
 });
