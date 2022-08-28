@@ -140,8 +140,8 @@ io.on('connection', function (socket) {
 
             console.log(users)
 
-            socket.on(room).emit("new-user", users)
-            socket.emit("new-user", users)
+            io.emit("new-user", users)
+
         }
 
     }
