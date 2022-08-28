@@ -140,7 +140,7 @@ io.on('connection', function (socket) {
 
             console.log(users)
 
-            io.emit("new-user", users)
+            socket.on(room).emit("new-user", users.filter(u => u.room_id == room))
 
         }
 
