@@ -116,7 +116,17 @@ io.on('connection', function (socket) {
     })
     socket.on('disconnecting', function () {
 
-        const room = leaveID(socket)
+        leaveID(socket)
+    });
+
+    function leaveID(socket) {
+
+        const indexOfObject = users.findIndex(object => {
+            return object.id == socket.id;
+        });
+
+
+        const room = users[indexOfObject]?.room_id
         if (room) {
 
             let index = eachRoomsNumbers?.findIndex((obj => obj.room == room))
@@ -133,17 +143,6 @@ io.on('connection', function (socket) {
             io.emit("new-user", users)
 
         }
-    });
-
-    function leaveID(socket) {
-
-        const indexOfObject = users.findIndex(object => {
-            return object.id == socket.id;
-        });
-
-
-
-        return users[indexOfObject]?.room_id
 
     }
 })
