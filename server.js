@@ -114,12 +114,12 @@ io.on('connection', function (socket) {
     socket.on('disconnect', function (user) {
         console.log("User disconnected: " + socket.id)
 
+        io.emit("new-user", users.filter(u => u.room_id != leaveID(socket)))
     })
     socket.on('disconnecting', function () {
 
         
 
-        io.emit("new-user", users.filter(u => u.room_id != leaveID(socket)))
     });
 
     function leaveID(socket) {
