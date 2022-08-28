@@ -119,15 +119,11 @@ io.on('connection', function (socket) {
 
         
 
-        io.emit("new-user", users.filter(u => !u.id.includes(leaveID(socket)[0])))
+        io.emit("new-user", users.filter(u => !u.id.includes(leaveID(socket))))
     });
 
     function leaveID(socket) {
-        let arrRooms = []
-        let rooms = socket.rooms;
-        rooms.forEach(function (room) {
-            arrRooms.push(room)
-        })
+       
         const indexOfObject = users.findIndex(object => {
             return object.id == socket.id;
         });
@@ -141,7 +137,7 @@ io.on('connection', function (socket) {
         eachRoomsNumbers?.splice(index, 1)
         users.splice(indexOfObject, 1)
 
-        return arrRooms
+        return room
 
     }
 })
