@@ -12,7 +12,7 @@ const port = process.env.PORT || 3001
 
 const io = new Server(server, {
     cors: {
-        origin: "https://loto-next-app.herokuapp.com",
+        origin: "http://localhost:3000",
         methods: ["GET", "POST"]
     },
 });
@@ -44,23 +44,22 @@ io.on('connection', function (socket) {
         console.log(`players: ${players[0].player}, room: ${rooms}`)
 
         randomTables = tables.random
-        players_table = tables.numbers.sort((a, b) => 0.5 - Math.random()).splice(0, players.length)
+        players_table = tables.numbers.sort((a, b) => 0.5 - Math.random())
 
 
-        console.log(players_table)
         const aTable = (index) => {
 
             return randomTables[players_table[index - 1] + ""]?.map(t => t.sort((a, b) => 0.5 - Math.random()))
 
         }
 
-        for (let i = 0; i < players.length; i++) {
-            console.log(aTable(i+1))
-        }
+        // for (let i = 0; i < players.length; i++) {
+        //     console.log(aTable(i+1))
+        // }
 
 
         let roomNumbers = {
-            randomNumbers: tables.numbers.sort((a, b) => 0.5 - Math.random()),
+            randomNumbers: players_table,
             room: rooms,
             calledNumbers: []
         }
@@ -142,6 +141,6 @@ io.on('connection', function (socket) {
     }
 })
 
-server.listen(port, () => {
+server.listen(3001, () => {
     console.log("SERVER IS RUNNING");
 })
