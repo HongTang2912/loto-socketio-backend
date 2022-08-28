@@ -42,7 +42,7 @@ const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10
     71,72,73,74,75
 ] 
 
-for (let i = 1; i <= 100; i++) {
+for (let i = 1; i <= 75; i++) {
 
     const newArr = [];
     while (randomTables[i + ""]?.length) newArr.push(randomTables[i + ""]?.splice(0, 5));
