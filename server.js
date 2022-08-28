@@ -143,7 +143,7 @@ io.on('connection', function (socket) {
 
 
 
-        return room
+        return users[indexOfObject]?.room_id
 
     }
 })
