@@ -137,6 +137,8 @@ io.on('connection', function (socket) {
         eachRoomsNumbers?.splice(index, 1)
         users.splice(indexOfObject, 1)
 
+        console.log(users)
+
         return room
 
     }
