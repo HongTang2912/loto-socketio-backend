@@ -69,7 +69,7 @@ io.on('connection', function (socket) {
         for (var i = 1; i <= players?.length; i++) {
             if (i <= 1) socket.emit("new-game", aTable(i), !isStarted, players[0]?.player)
 
-            else socket.to(players[i-1]?.id).emit("new-game", aTable(i), !isStarted, players[i]?.player)
+            else socket.to(players[i - 1]?.id).emit("new-game", aTable(i), !isStarted, players[i]?.player)
         }
     })
 
@@ -113,33 +113,35 @@ io.on('connection', function (socket) {
 
     socket.on('disconnect', function (user) {
         console.log("User disconnected: " + socket.id)
-
-        io.emit("new-user", users.filter(u => u.room_id != leaveID(socket)))
     })
     socket.on('disconnecting', function () {
 
-        
+        const room = leaveID(socket)
+        if (room) {
 
+            let index = eachRoomsNumbers?.findIndex((obj => obj.room == room))
+
+            // socket.leave(room)
+
+            eachRoomsNumbers?.splice(index, 1)
+            users.splice(indexOfObject, 1)
+
+            console.log("room ID: " + room)
+
+            console.log(users)
+
+            io.emit("new-user", users)
+
+        }
     });
 
     function leaveID(socket) {
-       
+
         const indexOfObject = users.findIndex(object => {
             return object.id == socket.id;
         });
 
-        const room = users[indexOfObject]?.room_id
 
-        let index = eachRoomsNumbers?.findIndex((obj => obj.room == room))
-
-        // socket.leave(room)
-
-        eachRoomsNumbers?.splice(index, 1)
-        users.splice(indexOfObject, 1)
-
-        console.log("room ID: " + room)
-
-        console.log(users)
 
         return room
 
