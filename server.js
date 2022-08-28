@@ -131,8 +131,8 @@ io.on('connection', function (socket) {
 
             let index = eachRoomsNumbers?.findIndex((obj => obj?.room == room))
 
-            // socket.leave(room)
-            if (index) eachRoomsNumbers?.splice(index, 1)
+            console.log("index: " + index)
+            if (index != -1) eachRoomsNumbers?.splice(index, 1)
             users.splice(indexOfObject, 1)
 
             console.log("room ID: " + room)
