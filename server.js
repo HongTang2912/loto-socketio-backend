@@ -119,7 +119,7 @@ io.on('connection', function (socket) {
 
         
 
-        io.emit("new-user", users.filter(u => !u.id == leaveID(socket)))
+        io.emit("new-user", users.filter(u => u.id =!= leaveID(socket)))
     });
 
     function leaveID(socket) {
