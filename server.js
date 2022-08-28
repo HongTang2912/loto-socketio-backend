@@ -131,9 +131,14 @@ io.on('connection', function (socket) {
         const indexOfObject = users.findIndex(object => {
             return object.id == socket.id;
         });
-        socket.leave(users[indexOfObject]?.room_id)
 
-        eachRoomsNumbers?.splice(indexOfObject, 1)
+        const room = users[indexOfObject]?.room_id
+
+        let index = eachRoomsNumbers?.findIndex((obj => obj.room == room))
+
+        // socket.leave(room)
+
+        eachRoomsNumbers?.splice(index, 1)
         users.splice(indexOfObject, 1)
 
         return arrRooms
