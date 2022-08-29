@@ -50,7 +50,8 @@ io.on('connection', function (socket) {
 
         const aTable = (index) => {
 
-            return randomTables[players_table[index - 1] + ""]?.map((_, colIndex) => array.map(row => row[colIndex]));
+            return randomTables[players_table[index - 1] + ""]?.map((_, colIndex) => 
+            randomTables[players_table[index - 1]].map(row => row[colIndex]));
 
         }
 
