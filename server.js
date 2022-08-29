@@ -43,14 +43,15 @@ io.on('connection', function (socket) {
     socket.on("start-game", (players, rooms, isStarted) => {
         console.log(`players: ${players[0].player}, room: ${rooms}`)
 
-        randomTables = tables.random
+        randomTables = tables.random.map(t => 
+                t.sort((a, b) => 0.5 - Math.random()))
         players_table = tables.numbers.sort((a, b) => 0.5 - Math.random())
 
+        console.log(players_table)
 
         const aTable = (index) => {
 
-            return randomTables[players_table[index - 1] + ""]?.map(t => 
-                t.sort((a, b) => 0.5 - Math.random())).map((_, colIndex) => 
+            return randomTables[players_table[index - 1] + ""]?.map((_, colIndex) => 
             randomTables[players_table[index - 1] + ""].map(row => row[colIndex]))
 
         }
@@ -66,6 +67,7 @@ io.on('connection', function (socket) {
         eachRoomsNumbers.push(roomNumbers)
 
         for (var i = 1; i <= players?.length; i++) {
+            console.log(aTable(i))
             if (i <= 1) socket.emit("new-game", aTable(i), !isStarted, players[0]?.player)
 
             else socket.to(players[i - 1]?.id).emit("new-game", aTable(i), !isStarted, players[i]?.player)
@@ -88,6 +90,8 @@ io.on('connection', function (socket) {
 
     socket.on('end-game', (list, room) => {
         let winner;
+        
+        
 
         let checkArr = randomTables.map(t =>
             t.map(t2 => {
