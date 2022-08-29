@@ -65,6 +65,7 @@ io.on('connection', function (socket) {
         eachRoomsNumbers.push(roomNumbers)
 
         for (var i = 1; i <= players?.length; i++) {
+            console.log(aTable(i).then(res=>res).catch(err=>err))
             if ( i == 1 ) socket.emit("new-game", aTable(i).then(res=>res).catch(err=>err), !isStarted, players[i]?.player)
 
             else socket.to(players[i - 1]?.id).emit("new-game", aTable(i).then(res=>res).catch(err=>err), !isStarted, players[i]?.player)
