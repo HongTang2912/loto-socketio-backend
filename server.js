@@ -43,15 +43,14 @@ io.on('connection', function (socket) {
     socket.on("start-game", (players, rooms, isStarted) => {
         console.log(`players: ${players[0].player}, room: ${rooms}`)
 
-        randomTables = tables.random
+        randomTables = tables.random.map(r => r?.map((_, colIndex) => r.map(row => row[colIndex])))
         players_table = tables.numbers.sort((a, b) => 0.5 - Math.random())
 
         console.log(players_table)
 
         const aTable = (index) => {
 
-            return randomTables[players_table[index - 1] + ""]?.map((_, colIndex) => 
-            randomTables[players_table[index - 1]].map(row => row[colIndex]));
+            return randomTables[players_table[index - 1] + ""]
 
         }
 
