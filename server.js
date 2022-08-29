@@ -50,7 +50,7 @@ io.on('connection', function (socket) {
 
         const aTable = async (index) => {
 
-            return await randomTables[players_table[index - 1] + ""]
+            return randomTables[players_table[index - 1] + ""]
 
         }
 
@@ -65,9 +65,9 @@ io.on('connection', function (socket) {
         eachRoomsNumbers.push(roomNumbers)
 
         for (var i = 1; i <= players?.length; i++) {
-            if ( i == 1 ) socket.emit("new-game", aTable(i).then(res=>res), !isStarted, players[i]?.player)
+            if ( i == 1 ) socket.emit("new-game", aTable(i).then(res=>res).catch(err=>err), !isStarted, players[i]?.player)
 
-            else socket.to(players[i - 1]?.id).emit("new-game", aTable(i).then(res=>res), !isStarted, players[i]?.player)
+            else socket.to(players[i - 1]?.id).emit("new-game", aTable(i).then(res=>res).catch(err=>err), !isStarted, players[i]?.player)
         }
     })
 
