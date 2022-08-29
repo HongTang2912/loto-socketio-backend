@@ -43,7 +43,7 @@ io.on('connection', function (socket) {
     socket.on("start-game", (players, rooms, isStarted) => {
         console.log(`players: ${players[0].player}, room: ${rooms}`)
 
-        randomTables = tables
+        randomTables = tables.random
         players_table = tables.numbers.sort((a, b) => 0.5 - Math.random())
 
         console.log(players_table)
@@ -65,10 +65,9 @@ io.on('connection', function (socket) {
         eachRoomsNumbers.push(roomNumbers)
 
         for (var i = 1; i <= players?.length; i++) {
-            console.log(aTable(i))
-            if (i <= 1) socket.emit("new-game", aTable(i), !isStarted, players[0]?.player)
 
-            else socket.to(players[i - 1]?.id).emit("new-game", aTable(i), !isStarted, players[i]?.player)
+
+            socket.to(players[i - 1]?.id).emit("new-game", aTable(i), !isStarted, players[i]?.player)
         }
     })
 
