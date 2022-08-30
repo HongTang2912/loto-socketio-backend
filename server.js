@@ -12,10 +12,11 @@ const port = process.env.PORT || 3001
 
 const io = new Server(server, {
     cors: {
-        origin: "https://loto-next-app.herokuapp.com",
+        origin: "http://localhost:3000",
         methods: ["GET", "POST"]
     },
 });
+
 
 let users = []
 
@@ -34,7 +35,11 @@ io.on('connection', function (socket) {
     })
 
     socket.on('get-user', function (user) {
-        users.push({ id: socket.id, player: user.player, room_id: user.room_id })
+        users.push({ 
+            id: socket.id, 
+            player: user.player, 
+            room_id: user.room_id
+        })
         socket.to(user.room_id).emit("new-user", users.filter(u => u.room_id == user.room_id))
         socket.emit("new-user", users.filter(u => u.room_id == user.room_id))
     })
@@ -44,7 +49,7 @@ io.on('connection', function (socket) {
         console.log(`players: ${players[0].player}, room: ${rooms}`)
 
         randomTables = tables.random.map(r => r?.map((_, colIndex) => r.map(row => row[colIndex])))
-        players_table = tables.numbers.sort((a, b) => 0.5 - Math.random())
+        players_table = tables.numbers.sort(() => 0.5 - Math.random())
 
         console.log(players_table)
 
@@ -86,8 +91,8 @@ io.on('connection', function (socket) {
         socket.emit('get-number', eachRoomsNumbers[index]?.calledNumbers, count, player, room)
     })
 
+    let winner = [];
     socket.on('end-game', (list, room) => {
-        let winner;
         
         
 
@@ -99,7 +104,7 @@ io.on('connection', function (socket) {
 
         for (let i = 0; i < users.filter(u => u.room_id == room).length; i++) {
             if (checkArr[players_table[i]] != -1 && checkArr[players_table[i]] >= 0 && checkArr[players_table[i]] <= 4) {
-                winner = users.filter(u => u.room_id == room)[i].player
+                winner.push(users.filter(u => u.room_id == room)[i].player)
             }
         }
 
