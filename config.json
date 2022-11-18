@@ -1,0 +1,5 @@
+{
+  "PORT": 3001,
+  "ORIGIN_URL": "https://loto-next-app.herokuapp.com",
+  "METHODS": ["GET", "POST"]
+}
