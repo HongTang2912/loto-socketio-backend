@@ -1,4 +1,5 @@
 const app = require("express")();
+const { log } = require("console");
 const http = require("http");
 
 const { Server } = require("socket.io");
@@ -112,6 +113,14 @@ io.on("connection", function (socket) {
       eachRoomsNumbers[index]?.randomNumbers[count]
     );
 
+    socket.emit(
+      "get-number",
+      eachRoomsNumbers[index]?.calledNumbers,
+      count,
+      player,
+      room
+    );
+
     socket
       .to(room)
       .emit(
@@ -121,13 +130,6 @@ io.on("connection", function (socket) {
         player,
         room
       );
-    socket.emit(
-      "get-number",
-      eachRoomsNumbers[index]?.calledNumbers,
-      count,
-      player,
-      room
-    );
   });
 
   let winner = [];
@@ -141,7 +143,6 @@ io.on("connection", function (socket) {
     );
 
     for (let i = 0; i < users.filter((u) => u.room_id == room).length; i++) {
-      socket.leave(room);
       if (
         checkArr[players_table[i]] != -1 &&
         checkArr[players_table[i]] >= 0 &&
@@ -149,11 +150,12 @@ io.on("connection", function (socket) {
       ) {
         winner.push(users.filter((u) => u.room_id == room)[i].player);
       }
-      // socket.leave(room);
-      leaveID(socket);
     }
 
     // console.log();
+    users = users.filter(
+      (u) => !users.filter((u) => u.room_id == room).includes(u)
+    );
 
     socket.emit("the-winner", list, room, winner);
     socket.to(room).emit("the-winner", list, room, winner);
