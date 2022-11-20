@@ -1,17 +1,19 @@
 const app = require("express")();
-const { log } = require("console");
 const http = require("http");
 
 const { Server } = require("socket.io");
 const server = http.createServer(app);
 
 const tables = require("./index");
+require('dotenv').config()
 
 const port = process.env.PORT || 3001;
+const url = process.env.STATUS == 'production' ? process.env.PROD_URL :
+  process.env.DEV_URL
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: url,
     methods: ["GET", "POST"],
   },
 });
@@ -21,6 +23,14 @@ let users = [];
 let randomTables;
 let eachRoomsNumbers = [];
 let players_table;
+let winner = [];
+
+function resetByRoom(object, room_name, room_id) {
+  console.log(`reset`);
+  return object.filter(
+    (u) => !object.filter((u) => u[room_name] == room_id).includes(u)
+  );
+}
 
 function leaveID(socket) {
   const indexOfObject = users.findIndex((object) => {
@@ -103,6 +113,8 @@ io.on("connection", function (socket) {
           .to(players[i - 1]?.id)
           .emit("new-game", aTable(i), !isStarted, players[i]?.player);
     }
+
+
   });
 
   socket.on("call-number", (room, count, player) => {
@@ -132,7 +144,6 @@ io.on("connection", function (socket) {
       );
   });
 
-  let winner = [];
   socket.on("end-game", (list, room) => {
     let checkArr = randomTables.map((t) =>
       t
@@ -153,12 +164,14 @@ io.on("connection", function (socket) {
     }
 
     // console.log();
-    users = users.filter(
-      (u) => !users.filter((u) => u.room_id == room).includes(u)
-    );
+    users = resetByRoom(users, "room_id", room);
+
+    eachRoomsNumbers = resetByRoom(eachRoomsNumbers, "room", room);
 
     socket.emit("the-winner", list, room, winner);
     socket.to(room).emit("the-winner", list, room, winner);
+
+    winner = [];
   });
 
   socket.on("disconnect", function (user) {
@@ -170,5 +183,5 @@ io.on("connection", function (socket) {
 });
 
 server.listen(port, () => {
-  console.log(`SERVER IS RUNNING ${port}`);
+  console.log(`SERVER IS RUNNING ${port}, ${url}`);
 });
