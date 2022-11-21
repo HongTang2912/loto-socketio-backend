@@ -5,11 +5,12 @@ const { Server } = require("socket.io");
 const server = http.createServer(app);
 
 const tables = require("./index");
-require('dotenv').config()
 
 const port = process.env.PORT || 3001;
-const url = process.env.STATUS == 'production' ? process.env.PROD_URL :
-  process.env.DEV_URL
+const url =
+  port == 3001
+    ? "http://localhost:3000"
+    : "https://loto-next-app.herokuapp.com";
 
 const io = new Server(server, {
   cors: {
@@ -113,8 +114,6 @@ io.on("connection", function (socket) {
           .to(players[i - 1]?.id)
           .emit("new-game", aTable(i), !isStarted, players[i]?.player);
     }
-
-
   });
 
   socket.on("call-number", (room, count, player) => {
