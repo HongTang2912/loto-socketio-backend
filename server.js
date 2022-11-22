@@ -1,4 +1,5 @@
 const app = require("express")();
+const { log } = require("console");
 const http = require("http");
 
 const { Server } = require("socket.io");
@@ -63,12 +64,30 @@ const aTable = (index) => {
   return randomTables[players_table[index - 1] + ""];
 };
 
+const removePlayer = (player) => {
+  users = users.filter((a) => a.player != player);
+  console.log(users);
+};
+
 io.on("connection", function (socket) {
   console.log(`User: ${socket.id}`);
 
   socket.on("join_room", function (room) {
     console.log(`User ${socket.id} joined room ${room}`);
     socket.join(room);
+  });
+
+  socket.on("remove-user", (user) => {
+    removePlayer(user.player);
+
+    socket.to(user.room_id).emit(
+      "new-user",
+      users.filter((u) => u.room_id == user.room_id)
+    );
+    socket.emit(
+      "new-user",
+      users.filter((u) => u.room_id == user.room_id)
+    );
   });
 
   socket.on("get-user", function (user) {
@@ -95,7 +114,7 @@ io.on("connection", function (socket) {
     );
     players_table = tables.numbers.sort(() => 0.5 - Math.random());
 
-    console.log(players_table);
+    console.log(`call numbers array: ${JSON.stringify(players_table)}`);
 
     let roomNumbers = {
       randomNumbers: players_table,
