@@ -41,11 +41,11 @@ function leaveID(socket) {
 
   const room = users[indexOfObject]?.room_id;
   const leaveUser = users[indexOfObject]?.id;
+  let index = eachRoomsNumbers?.findIndex((obj) => obj?.room == room);
 
   if (room) {
-    let index = eachRoomsNumbers?.findIndex((obj) => obj?.room == room);
 
-    users.splice(indexOfObject, 1);
+    if (indexOfObject != -1) users.splice(indexOfObject, 1);
     if (index != -1) eachRoomsNumbers?.splice(index, 1);
 
     console.log("room ID: " + room);
@@ -64,9 +64,9 @@ const aTable = (index) => {
   return randomTables[players_table[index - 1] + ""];
 };
 
-const removePlayer = (player) => {
-  users = users.filter((a) => a.player != player);
-  console.log(users);
+const removePlayer = (player, room) => {
+  users = users.filter((a) => a.player != player && a.room_id == room);
+  // console.log(users);
 };
 
 io.on("connection", function (socket) {
@@ -78,7 +78,8 @@ io.on("connection", function (socket) {
   });
 
   socket.on("remove-user", (user) => {
-    removePlayer(user.player);
+    removePlayer(user.player, user.room_id);
+    console.log(users);
 
     socket.to(user.room_id).emit(
       "new-user",
@@ -96,6 +97,8 @@ io.on("connection", function (socket) {
       player: user.player,
       room_id: user.room_id,
     });
+
+    console.log(users);
     socket.to(user.room_id).emit(
       "new-user",
       users.filter((u) => u.room_id == user.room_id)
@@ -107,8 +110,8 @@ io.on("connection", function (socket) {
   });
 
   socket.on("start-game", (players, rooms, isStarted) => {
-    console.log(`players: ${players[0].player}, room: ${rooms}`);
-
+    // console.log(`players: ${players[0].player}, room: ${rooms}`);
+    console.log(users);
     randomTables = tables.random.map((r) =>
       r?.map((_, colIndex) => r.map((row) => row[colIndex]))
     );
