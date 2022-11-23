@@ -1,5 +1,5 @@
 const app = require("express")();
-const { log } = require("console");
+// const { log } = require("console");
 const http = require("http");
 
 const { Server } = require("socket.io");
@@ -44,7 +44,6 @@ function leaveID(socket) {
   let index = eachRoomsNumbers?.findIndex((obj) => obj?.room == room);
 
   if (room) {
-
     if (indexOfObject != -1) users.splice(indexOfObject, 1);
     if (index != -1) eachRoomsNumbers?.splice(index, 1);
 
@@ -64,8 +63,8 @@ const aTable = (index) => {
   return randomTables[players_table[index - 1] + ""];
 };
 
-const removePlayer = (player, room) => {
-  users = users.filter((a) => a.player != player && a.room_id == room);
+const removePlayer = (socket) => {
+  users = users.filter((a) => a.id != socket.id);
   // console.log(users);
 };
 
@@ -78,7 +77,7 @@ io.on("connection", function (socket) {
   });
 
   socket.on("remove-user", (user) => {
-    removePlayer(user.player, user.room_id);
+    removePlayer(socket);
     console.log(users);
 
     socket.to(user.room_id).emit(
