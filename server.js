@@ -20,52 +20,20 @@ const io = new Server(server, {
   },
 });
 
-let users = [];
+let users = {};
 
 let randomTables;
-let eachRoomsNumbers = [];
+let eachRoomsNumbers = {};
 let players_table;
-let winner = [];
 
-function resetByRoom(object, room_name, room_id) {
-  console.log(`reset`);
-  return object.filter(
-    (u) => !object.filter((u) => u[room_name] == room_id).includes(u)
-  );
-}
-
-function leaveID(socket) {
-  const indexOfObject = users.findIndex((object) => {
-    return object.id == socket.id;
-  });
-
-  const room = users[indexOfObject]?.room_id;
-  const leaveUser = users[indexOfObject]?.id;
-  let index = eachRoomsNumbers?.findIndex((obj) => obj?.room == room);
-
-  if (room) {
-    if (indexOfObject != -1) users.splice(indexOfObject, 1);
-    if (index != -1) eachRoomsNumbers?.splice(index, 1);
-
-    console.log("room ID: " + room);
-    console.log("USer ID: " + leaveUser);
-
-    const players = users.filter((u) => u.room_id == room);
-
-    socket.to(room).emit("new-user", players);
-  }
-  console.log(
-    "remain: ",
-    users.filter((u) => u.room_id == room)
-  );
-}
 const aTable = (index) => {
-  return randomTables[players_table[index - 1] + ""];
+  return randomTables[players_table[index] + ""];
 };
 
-const removePlayer = (socket) => {
-  users = users.filter((a) => a.id != socket.id);
-  // console.log(users);
+const leaveID = (socket, player) => {
+  player[1]
+    ? (users[player[1]] = users[player[1]]?.filter((u) => player[0] !== u.id))
+    : null;
 };
 
 io.on("connection", function (socket) {
@@ -76,41 +44,25 @@ io.on("connection", function (socket) {
     socket.join(room);
   });
 
-  socket.on("remove-user", (user) => {
-    removePlayer(socket);
-    console.log(users);
-
-    socket.to(user.room_id).emit(
-      "new-user",
-      users.filter((u) => u.room_id == user.room_id)
-    );
-    socket.emit(
-      "new-user",
-      users.filter((u) => u.room_id == user.room_id)
-    );
-  });
-
   socket.on("get-user", function (user) {
-    users.push({
+    users[user.room_id + ""] == undefined
+      ? (users[user.room_id + ""] = [])
+      : null;
+
+    users[user.room_id + ""].push({
       id: socket.id,
       player: user.player,
-      room_id: user.room_id,
     });
 
     console.log(users);
-    socket.to(user.room_id).emit(
-      "new-user",
-      users.filter((u) => u.room_id == user.room_id)
-    );
-    socket.emit(
-      "new-user",
-      users.filter((u) => u.room_id == user.room_id)
-    );
+    socket.to(user.room_id).emit("new-user", users[user.room_id + ""]);
+    socket.emit("new-user", users[user.room_id + ""]);
   });
 
   socket.on("start-game", (players, rooms, isStarted) => {
     // console.log(`players: ${players[0].player}, room: ${rooms}`);
     console.log(users);
+
     randomTables = tables.random.map((r) =>
       r?.map((_, colIndex) => r.map((row) => row[colIndex]))
     );
@@ -124,30 +76,28 @@ io.on("connection", function (socket) {
       calledNumbers: [],
     };
 
-    eachRoomsNumbers.push(roomNumbers);
+    eachRoomsNumbers[rooms + ""] = roomNumbers;
 
-    for (var i = 1; i <= players?.length; i++) {
-      console.log(aTable(i));
-      if (i == 1)
-        socket.emit("new-game", aTable(i), !isStarted, players[i]?.player);
+    players.forEach((p, index) => {
+      console.log(aTable(index));
+      if (index == 0)
+        socket.emit("new-game", aTable(index), !isStarted, p?.player);
       else
-        socket
-          .to(players[i - 1]?.id)
-          .emit("new-game", aTable(i), !isStarted, players[i]?.player);
-    }
+        socket.to(p?.id).emit("new-game", aTable(index), !isStarted, p?.player);
+    });
   });
 
   socket.on("call-number", (room, count, player) => {
-    let index = eachRoomsNumbers?.findIndex((obj) => obj.room == room);
-    console.log(eachRoomsNumbers[index]?.calledNumbers);
+    // let index = eachRoomsNumbers?.findIndex((obj) => obj.room == room);
+    console.log(eachRoomsNumbers[room + ""]?.calledNumbers);
 
-    eachRoomsNumbers[index]?.calledNumbers.push(
-      eachRoomsNumbers[index]?.randomNumbers[count]
+    eachRoomsNumbers[room + ""]?.calledNumbers.push(
+      eachRoomsNumbers[room + ""]?.randomNumbers[count]
     );
 
     socket.emit(
       "get-number",
-      eachRoomsNumbers[index]?.calledNumbers,
+      eachRoomsNumbers[room + ""]?.calledNumbers,
       count,
       player,
       room
@@ -157,13 +107,14 @@ io.on("connection", function (socket) {
       .to(room)
       .emit(
         "get-number",
-        eachRoomsNumbers[index]?.calledNumbers,
+        eachRoomsNumbers[room + ""]?.calledNumbers,
         count,
         player,
         room
       );
   });
 
+  let winner = [];
   socket.on("end-game", (list, room) => {
     let checkArr = randomTables.map((t) =>
       t
@@ -173,24 +124,26 @@ io.on("connection", function (socket) {
         .findIndex((a) => [5].includes(a))
     );
 
-    for (let i = 0; i < users.filter((u) => u.room_id == room).length; i++) {
+    for (let i = 0; i < users[room + ""].length; i++) {
       if (
         checkArr[players_table[i]] != -1 &&
         checkArr[players_table[i]] >= 0 &&
         checkArr[players_table[i]] <= 4
       ) {
-        winner.push(users.filter((u) => u.room_id == room)[i].player);
+        winner.push(users[room + ""][i]?.player);
       }
     }
 
     // console.log();
-    users = resetByRoom(users, "room_id", room);
 
-    eachRoomsNumbers = resetByRoom(eachRoomsNumbers, "room", room);
+    delete users[room + ""];
 
-    socket.emit("the-winner", list, room, winner);
-    socket.to(room).emit("the-winner", list, room, winner);
+    delete eachRoomsNumbers[room + ""];
+    // console.log(eachRoomsNumbers);
 
+    socket.emit("the-winner", winner);
+    socket.to(room).emit("the-winner", winner);
+    io.socketsLeave(room);
     winner = [];
   });
 
@@ -198,7 +151,11 @@ io.on("connection", function (socket) {
     console.log("User disconnected: " + socket.id);
   });
   socket.on("disconnecting", function () {
-    leaveID(socket);
+    // console.log(Array.from(socket.rooms));
+    const p = Array.from(socket.rooms);
+    leaveID(socket, p);
+    socket.to(p[1]).emit("new-user", users[p[1]]);
+    socket.emit("new-user", users[p[1]]);
   });
 });
 
