@@ -7,7 +7,7 @@
     "node": "16.x"
   },
   "scripts": {
-    "start": "node server"
+    "start": "node index"
   },
   "author": "",
   "license": "ISC",
