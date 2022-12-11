@@ -1,164 +1,54 @@
-const app = require("express")();
-// const { log } = require("console");
-const http = require("http");
+const tables = require('./tables');
 
-const { Server } = require("socket.io");
-const server = http.createServer(app);
+const getRendomTables = (players) => {
+    let array = {
 
-const tables = require("./config");
-
-const port = process.env.PORT || 3001;
-const url =
-  port == 3001
-    ? "http://localhost:3000"
-    : "https://loto-next-app.vercel.app";
-
-const io = new Server(server, {
-  cors: {
-    origin: url,
-    methods: ["GET", "POST"],
-  },
-});
-
-let users = {};
-
-let randomTables;
-let eachRoomsNumbers = {};
-let players_table;
-
-const aTable = (index) => {
-  return randomTables[players_table[index] + ""];
-};
-
-const leaveID = (socket, player) => {
-  player[1]
-    ? (users[player[1]] = users[player[1]]?.filter((u) => player[0] !== u.id))
-    : null;
-};
-
-io.on("connection", function (socket) {
-  console.log(`User: ${socket.id}`);
-
-  socket.on("join_room", function (room) {
-    console.log(`User ${socket.id} joined room ${room}`);
-    socket.join(room);
-  });
-
-  socket.on("get-user", function (user) {
-    users[user.room_id + ""] == undefined
-      ? (users[user.room_id + ""] = [])
-      : null;
-
-    users[user.room_id + ""].push({
-      id: socket.id,
-      player: user.player,
-    });
-
-    console.log(users);
-    socket.to(user.room_id).emit("new-user", users[user.room_id + ""]);
-    socket.emit("new-user", users[user.room_id + ""]);
-  });
-
-  socket.on("start-game", (players, rooms, isStarted) => {
-    // console.log(`players: ${players[0].player}, room: ${rooms}`);
-    console.log(users);
-
-    randomTables = tables.random.map((r) =>
-      r?.map((_, colIndex) => r.map((row) => row[colIndex]))
-    );
-    players_table = tables.numbers.sort(() => 0.5 - Math.random());
-
-    console.log(`call numbers array: ${JSON.stringify(players_table)}`);
-
-    let roomNumbers = {
-      randomNumbers: players_table,
-      room: rooms,
-      calledNumbers: [],
     };
+    for (let i = 0; i < players; i++) {
+       
 
-    eachRoomsNumbers[rooms + ""] = roomNumbers;
+        array[i + 1] = tables[i+1];
+    }
+    return array
+}
 
-    players.forEach((p, index) => {
-      console.log(aTable(index));
-      if (index == 0)
-        socket.emit("new-game", aTable(index), !isStarted, p?.player);
-      else
-        socket.to(p?.id).emit("new-game", aTable(index), !isStarted, p?.player);
-    });
-  });
 
-  socket.on("call-number", (room, count, player) => {
-    // let index = eachRoomsNumbers?.findIndex((obj) => obj.room == room);
-    console.log(eachRoomsNumbers[room + ""]?.calledNumbers);
+function shuffle(array) {
+    let currentIndex = array.length, randomIndex;
 
-    eachRoomsNumbers[room + ""]?.calledNumbers.push(
-      eachRoomsNumbers[room + ""]?.randomNumbers[count]
-    );
+    // While there remain elements to shuffle.
+    while (currentIndex != 0) {
 
-    socket.emit(
-      "get-number",
-      eachRoomsNumbers[room + ""]?.calledNumbers,
-      count,
-      player,
-      room
-    );
+        // Pick a remaining element.
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
 
-    socket
-      .to(room)
-      .emit(
-        "get-number",
-        eachRoomsNumbers[room + ""]?.calledNumbers,
-        count,
-        player,
-        room
-      );
-  });
-
-  let winner = [];
-  socket.on("end-game", (list, room) => {
-    let checkArr = randomTables.map((t) =>
-      t
-        .map((t2) => {
-          return t2.filter((a) => list.includes(a)).length;
-        })
-        .findIndex((a) => [5].includes(a))
-    );
-
-    for (let i = 0; i < users[room + ""].length; i++) {
-      if (
-        checkArr[players_table[i]] != -1 &&
-        checkArr[players_table[i]] >= 0 &&
-        checkArr[players_table[i]] <= 4
-      ) {
-        winner.push(users[room + ""][i]?.player);
-      }
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
     }
 
-    // console.log();
+    return array;
+}
 
-    delete users[room + ""];
+const randomTables2D = []
+const randomTables = getRendomTables(51)
+const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+    , 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+    , 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+    31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+    41, 42, 43, 44, 45, 46, 47, 48, 49, 50
+] 
 
-    delete eachRoomsNumbers[room + ""];
-    // console.log(eachRoomsNumbers);
+for (let i = 1; i <= 51; i++) {
 
-    socket.emit("the-winner", winner);
-    socket.to(room).emit("the-winner", winner);
-    io.socketsLeave(room);
-    winner = [];
-  });
+    const newArr = [];
+    while (randomTables[i + ""]?.length) newArr.push(randomTables[i + ""]?.splice(0, 5));
+    randomTables2D.push(newArr);
 
-  socket.on("disconnect", function (user) {
-    console.log("User disconnected: " + socket.id);
-  });
-  socket.on("disconnecting", function () {
-    // console.log(Array.from(socket.rooms));
-    const p = Array.from(socket.rooms);
-    leaveID(socket, p);
-    socket.to(p[1]).emit("new-user", users[p[1]]);
-    socket.emit("new-user", users[p[1]]);
-  });
-});
+}
 
-server.listen(port, () => {
-  console.log(`SERVER IS RUNNING ${port}, ${url}`);
-});
+module.exports = {
+    random: randomTables2D,
+    numbers: numbers
+}
