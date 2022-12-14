@@ -11,7 +11,7 @@ const port = process.env.PORT || 3001;
 const url =
   port == 3001
     ? "http://localhost:3000"
-    : "https://loto-next-app.vercel.app";
+    : "https://loto-next-app-git-main-hongtang-digiex.vercel.app";
 
 const io = new Server(server, {
   cors: {
