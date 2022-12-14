@@ -15,7 +15,7 @@ const url =
 
 const io = new Server(server, {
   cors: {
-    origin: url,
+    origin: "https://loto-next-app-git-main-hongtang-digiex.vercel.app",
     methods: ["GET", "POST"],
   },
 });
