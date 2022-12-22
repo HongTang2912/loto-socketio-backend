@@ -13,7 +13,12 @@ const url =
     ? "https://loto-next-app-git-main-hongtang-digiex.vercel.app"
     : "https://loto-next-app-git-main-hongtang-digiex.vercel.app";
 
-const io = new Server("https://loto-next-app.vercel.app", { transports : ['websocket'] });
+const io = new Server(server, {
+  cor: {
+     origin: url,
+     methods: ["GET", "POST"]
+  }
+});
 
 let users = {};
 
