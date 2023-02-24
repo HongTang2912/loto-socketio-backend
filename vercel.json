@@ -3,14 +3,14 @@
   "name": "lotto-game",
   "builds": [
     {
-      "src": "src/server.js",
+      "src": "server.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/src/server.js"
+      "dest": "/server.js"
     }
   ]
 }
