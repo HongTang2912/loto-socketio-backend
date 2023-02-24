@@ -9,11 +9,14 @@ const url = process.env.CLIENT_URL;
 const sslCert = fs.readFileSync("./ssl-cert.pem");
 const sslKey = fs.readFileSync("./ssl-key.pem");
 
-const httpServer = https.createServer({ key: sslKey, cert: sslCert });
+const httpServer = https.createServer({
+  key: process.env.SSL_KEY | sslKey,
+  cert: process.env.SSL_CERT | sslCert,
+});
 
 const io = require("socket.io")(httpServer);
 
-let users = {}; 
+let users = {};
 
 let randomTables;
 let eachRoomsNumbers = {};
