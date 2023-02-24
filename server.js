@@ -1,9 +1,15 @@
-const httpServer = require("http").createServer();
+const https = require("https");
 const tables = require(".");
+const fs = require("fs");
 require("dotenv").config();
 
 const port = process.env.PORT;
 const url = process.env.CLIENT_URL;
+
+const sslCert = fs.readFileSync("./ssl-cert.pem");
+const sslKey = fs.readFileSync("./ssl-key.pem");
+
+const httpServer = https.createServer({ key: sslKey, cert: sslCert });
 
 const io = require("socket.io")(httpServer);
 
