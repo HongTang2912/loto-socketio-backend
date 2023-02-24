@@ -13,7 +13,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@netlify/build": "^29.5.8",
     "cookie-universal": "^2.2.2",
     "dotenv": "^16.0.3",
     "express": "^4.18.1",
