@@ -1,4 +1,4 @@
-const http = require("https");
+const http = require("http");
 const tables = require(".");
 const fs = require("fs");
 require("dotenv").config();
