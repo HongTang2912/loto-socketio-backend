@@ -7,7 +7,6 @@
     "node": "18.x"
   },
   "scripts": {
-    "dev": "nodemon ./src/server",
     "start": "node ./src/server"
   },
   "author": "",
