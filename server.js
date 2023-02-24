@@ -1,4 +1,4 @@
-const httpServer = require("https").createServer();
+const httpServer = require("http").createServer();
 const tables = require(".");
 require("dotenv").config();
 
@@ -13,7 +13,7 @@ let randomTables;
 let eachRoomsNumbers = {};
 let players_table;
 
-const aTable = (index) => { 
+const aTable = (index) => {
   return randomTables[players_table[index] + ""];
 };
 
