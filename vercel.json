@@ -11,5 +11,9 @@
       "src": "/(.*)",
       "dest": "/server.js"
     }
-  ]
+  ],
+  "server": {
+    "default": "https",
+    "port": 80
+  }
 }
