@@ -1,24 +1,11 @@
-const app = require("express")();
-// const { log } = require("console");
-const http = require("http");
-
-const { Server } = require("socket.io");
-const server = http.createServer(app);
-
+const httpServer = require("http").createServer();
 const tables = require(".");
+require("dotenv").config();
 
-const port = process.env.PORT || 3001;
-const url =
-  port == 3001
-    ? "https://loto-next-app-git-main-hongtang-digiex.vercel.app"
-    : "https://loto-next-app-git-main-hongtang-digiex.vercel.app";
+const port = process.env.PORT;
+const url = process.env.CLIENT_URL;
 
-const io = new Server(server, {
-  cor: {
-     origin: url,
-     methods: ["GET", "POST"]
-  }
-});
+const io = require("socket.io")(httpServer);
 
 let users = {};
 
@@ -26,7 +13,7 @@ let randomTables;
 let eachRoomsNumbers = {};
 let players_table;
 
-const aTable = (index) => {
+const aTable = (index) => { 
   return randomTables[players_table[index] + ""];
 };
 
@@ -159,6 +146,6 @@ io.on("connection", function (socket) {
   });
 });
 
-server.listen(port, () => {
+httpServer.listen(port, () => {
   console.log(`SERVER IS RUNNING ${port}, ${url}`);
 });
