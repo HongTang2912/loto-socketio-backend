@@ -46,14 +46,11 @@ io.on("connection", function (socket) {
       player: user.player,
     });
 
-    console.log(users);
     socket.to(user.room_id).emit("new-user", users[user.room_id + ""]);
     socket.emit("new-user", users[user.room_id + ""]);
   });
 
   socket.on("start-game", (players, rooms, isStarted) => {
-    // console.log(`players: ${players[0].player}, room: ${rooms}`);
-    console.log(users);
 
     randomTables = tables.random.map((r) =>
       r?.map((_, colIndex) => r.map((row) => row[colIndex]))
@@ -81,7 +78,6 @@ io.on("connection", function (socket) {
 
   socket.on("call-number", (room, count, player) => {
     // let index = eachRoomsNumbers?.findIndex((obj) => obj.room == room);
-    console.log(eachRoomsNumbers[room + ""]?.calledNumbers);
 
     eachRoomsNumbers[room + ""]?.calledNumbers.push(
       eachRoomsNumbers[room + ""]?.randomNumbers[count]
@@ -107,31 +103,14 @@ io.on("connection", function (socket) {
   });
 
   let winner = [];
-  socket.on("end-game", (list, room) => {
-    let checkArr = randomTables.map((t) =>
-      t
-        .map((t2) => {
-          return t2.filter((a) => list.includes(a)).length;
-        })
-        .findIndex((a) => [5].includes(a))
-    );
+  socket.on("end-game", (winner_name, room) => {
 
-    for (let i = 0; i < users[room + ""].length; i++) {
-      if (
-        checkArr[players_table[i]] != -1 &&
-        checkArr[players_table[i]] >= 0 &&
-        checkArr[players_table[i]] <= 4
-      ) {
-        winner.push(users[room + ""][i]?.player);
-      }
-    }
 
-    // console.log();
+    winner.push(winner_name)
 
     delete users[room + ""];
 
     delete eachRoomsNumbers[room + ""];
-    // console.log(eachRoomsNumbers);
 
     socket.emit("the-winner", winner);
     socket.to(room).emit("the-winner", winner);
