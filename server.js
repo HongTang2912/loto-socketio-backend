@@ -1,6 +1,7 @@
 const http = require("https");
 const tables = require(".");
 const fs = require("fs");
+const socketIo = require("socket.io");
 require("dotenv").config();
 
 const port = process.env.PORT;
@@ -9,7 +10,7 @@ const url = process.env.CLIENT_URL;
 
 const httpServer = http.createServer();
 
-const io = require("socket.io")(httpServer);
+const io = socketIo(httpServer);
 
 let users = {};
 
