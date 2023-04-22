@@ -1,19 +1,21 @@
 const http = require("http");
 const tables = require(".");
-const fs = require("fs");
+
 const socketIo = require("socket.io");
 require("dotenv").config();
+
+const joinRoom = require('./modules/joinRoom');
+const addUser = require('./modules/addUser');
 
 const port = process.env.PORT;
 const url = process.env.CLIENT_URL;
 
 
 const httpServer = http.createServer();
-
 const io = socketIo(httpServer);
 
-let users = {};
 
+let users = {};
 let randomTables;
 let eachRoomsNumbers = {};
 let players_table;
@@ -22,7 +24,7 @@ const aTable = (index) => {
   return randomTables[players_table[index] + ""];
 };
 
-const leaveID = (socket, player) => {
+const leaveID = (player) => {
   player[1]
     ? (users[player[1]] = users[player[1]]?.filter((u) => player[0] !== u.id))
     : null;
@@ -31,26 +33,11 @@ const leaveID = (socket, player) => {
 io.on("connection", function (socket) {
   console.log(`User: ${socket.id}`);
 
-  socket.on("join_room", function (room) {
-    console.log(`User ${socket.id} joined room ${room}`);
-    socket.join(room);
-  });
+  socket.on("join_room", (room) => {joinRoom(socket, room)});
 
-  socket.on("get-user", function (user) {
-    users[user.room_id + ""] == undefined
-      ? (users[user.room_id + ""] = [])
-      : null;
+  socket.on("get-user", (user) => {addUser(socket, user, users)});
 
-    users[user.room_id + ""].push({
-      id: socket.id,
-      player: user.player,
-    });
-
-    socket.to(user.room_id).emit("new-user", users[user.room_id + ""]);
-    socket.emit("new-user", users[user.room_id + ""]);
-  });
-
-  socket.on("start-game", (players, rooms, isStarted) => {
+  socket.on("start-game", (startGameEmition) => {
 
     randomTables = tables.random.map((r) =>
       r?.map((_, colIndex) => r.map((row) => row[colIndex]))
@@ -61,18 +48,25 @@ io.on("connection", function (socket) {
 
     let roomNumbers = {
       randomNumbers: players_table,
-      room: rooms,
+      room: startGameEmition.room,
       calledNumbers: [],
     };
 
-    eachRoomsNumbers[rooms + ""] = roomNumbers;
+    eachRoomsNumbers[startGameEmition.room + ""] = roomNumbers;
 
-    players.forEach((p, index) => {
+    startGameEmition.players.forEach((p, index) => {
       console.log(aTable(index));
-      if (index == 0)
-        socket.emit("new-game", aTable(index), !isStarted, p?.player);
-      else
-        socket.to(p?.id).emit("new-game", aTable(index), !isStarted, p?.player);
+
+      const playerSlot = {
+        table: aTable(index), 
+        isStarted: true, 
+        name: p?.player
+      }
+
+      // if (index == 0)
+        socket.emit("new-game", playerSlot);
+      // else
+        socket.to(startGameEmition.room).emit("new-game", playerSlot);
     });
   });
 
@@ -102,8 +96,8 @@ io.on("connection", function (socket) {
       );
   });
 
-  let winner = [];
   socket.on("end-game", (winner_name, room) => {
+    let winner = [];
 
 
     winner.push(winner_name)
@@ -115,7 +109,6 @@ io.on("connection", function (socket) {
     socket.emit("the-winner", winner);
     socket.to(room).emit("the-winner", winner);
     io.socketsLeave(room);
-    winner = [];
   });
 
   socket.on("disconnect", function (user) {
@@ -124,7 +117,7 @@ io.on("connection", function (socket) {
   socket.on("disconnecting", function () {
     // console.log(Array.from(socket.rooms));
     const p = Array.from(socket.rooms);
-    leaveID(socket, p);
+    leaveID(p);
     socket.to(p[1]).emit("new-user", users[p[1]]);
     socket.emit("new-user", users[p[1]]);
   });
