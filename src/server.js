@@ -5,6 +5,7 @@ const socketIo = require("socket.io");
 require("dotenv").config();
 
 const joinRoom = require('./modules/joinRoom');
+const removeUser = require('./modules/removeUser');
 const addUser = require('./modules/addUser');
 
 const port = process.env.PORT;
@@ -32,7 +33,9 @@ const leaveID = (player) => {
 
 io.on("connection", function (socket) {
   console.log(`User: ${socket.id}`);
+  
 
+  socket.on('remove-user', (user) => {removeUser(socket, user, users)});
   socket.on("join_room", (room) => {joinRoom(socket, room)});
 
   socket.on("get-user", (user) => {addUser(socket, user, users)});
@@ -63,10 +66,10 @@ io.on("connection", function (socket) {
         name: p?.player
       }
 
-      // if (index == 0)
+      if (index == 0)
         socket.emit("new-game", playerSlot);
-      // else
-        socket.to(startGameEmition.room).emit("new-game", playerSlot);
+      else
+        socket.to(p?.id).emit("new-game", playerSlot);
     });
   });
 
