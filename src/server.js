@@ -1,19 +1,17 @@
-const http = require("http");
 const tables = require(".");
 
-const socketIo = require("socket.io");
 require("dotenv").config();
 
 const joinRoom = require('./modules/joinRoom');
 const removeUser = require('./modules/removeUser');
 const addUser = require('./modules/addUser');
 
+var app = require('express')();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+
 const port = process.env.PORT;
 const url = process.env.CLIENT_URL;
-
-
-const httpServer = http.createServer();
-const io = socketIo(httpServer);
 
 
 let users = {};
@@ -30,6 +28,25 @@ const leaveID = (player) => {
     ? (users[player[1]] = users[player[1]]?.filter((u) => player[0] !== u.id))
     : null;
 };
+
+// generate cusomized ID for socket client
+function makeid(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()?><":}{[]|\\';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
+}
+
+// io.engine.generateId = function (req) {
+//     // generate a new custom id here
+//     return makeid(15);
+// }
+
 
 io.on("connection", function (socket) {
   console.log(`User: ${socket.id}`);
@@ -58,13 +75,13 @@ io.on("connection", function (socket) {
     eachRoomsNumbers[startGameEmition.room + ""] = roomNumbers;
 
     startGameEmition.players.forEach((p, index) => {
-      console.log(aTable(index));
 
       const playerSlot = {
         table: aTable(index), 
         isStarted: true, 
         name: p?.player
       }
+      console.log(playerSlot);
 
       if (index == 0)
         socket.emit("new-game", playerSlot);
@@ -73,7 +90,7 @@ io.on("connection", function (socket) {
     });
   });
 
-  socket.on("call-number", (room, count, player) => {
+  socket.on("call-number", (room, count) => {
     // let index = eachRoomsNumbers?.findIndex((obj) => obj.room == room);
 
     eachRoomsNumbers[room + ""]?.calledNumbers.push(
@@ -84,9 +101,8 @@ io.on("connection", function (socket) {
       "get-number",
       eachRoomsNumbers[room + ""]?.calledNumbers,
       count,
-      player,
-      room
     );
+
 
     socket
       .to(room)
@@ -94,27 +110,30 @@ io.on("connection", function (socket) {
         "get-number",
         eachRoomsNumbers[room + ""]?.calledNumbers,
         count,
-        player,
-        room
       );
   });
 
-  socket.on("end-game", (winner_name, room) => {
-    let winner = [];
+  let winnerArray = [];
+  socket.on("end-game", ({winner, room_id, rowNumbers}) => {
+    
+    
 
+    winnerArray.push({
+      winner,
+      winnerNumbers: rowNumbers
+    })
 
-    winner.push(winner_name)
+    delete users[room_id + ""];
 
-    delete users[room + ""];
+    delete eachRoomsNumbers[room_id + ""];
+    
 
-    delete eachRoomsNumbers[room + ""];
-
-    socket.emit("the-winner", winner);
-    socket.to(room).emit("the-winner", winner);
-    io.socketsLeave(room);
+    socket.emit("the-winner", winnerArray);
+    socket.to(room_id).emit("the-winner",winnerArray);
+    io.socketsLeave(room_id);
   });
 
-  socket.on("disconnect", function (user) {
+  socket.on("disconnect", function () {
     console.log("User disconnected: " + socket.id);
   });
   socket.on("disconnecting", function () {
@@ -126,6 +145,6 @@ io.on("connection", function (socket) {
   });
 });
 
-httpServer.listen(port, () => {
+http.listen(port, () => {
   console.log(`SERVER IS RUNNING ${port}, ${url}`);
 });
